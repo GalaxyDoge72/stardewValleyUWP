@@ -1,6 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using stardewValleyUWP.Handlers;
 using stardewValleyUWP.Screens;
+using stardewValleyUWP.Utilities;
+using Microsoft.Xna.Framework.Graphics;
+using Windows.UI.Xaml.Controls;
 
 namespace stardewValleyUWP
 {
@@ -19,14 +22,16 @@ namespace stardewValleyUWP
         protected override void Initialize()
         {
             _screenManager = new ScreenManager();
-
-            // Register screens
-            _screenManager.AddScreen("MainMenu", new titleScreen(_screenManager));
-
-            // Start at MainMenu
-            _screenManager.SwitchScreen("MainMenu");
-
             base.Initialize();
+        }
+
+        protected override void LoadContent()
+        {
+            GameServices.Content = Content;
+            GameServices.SpriteBatch = new SpriteBatch(GraphicsDevice);
+
+            _screenManager.AddScreen("MainMenu", new titleScreen(_screenManager));
+            _screenManager.SwitchScreen("MainMenu");
         }
 
         protected override void Update(GameTime gameTime)
