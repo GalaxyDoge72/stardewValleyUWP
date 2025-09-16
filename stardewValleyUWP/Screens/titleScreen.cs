@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using stardewValleyUWP.Handlers;
 using stardewValleyUWP.Objects;
 using stardewValleyUWP.Utilities;
+using stardewValleyUWP.Handlers;
 using Windows.ApplicationModel.Core;
 using Windows.System;
 using Windows.UI.Core;
@@ -14,6 +14,7 @@ namespace stardewValleyUWP.Screens
         private UIManager uiManager;
         private Grid grid;
         private SpriteFont buttonFont;
+        private SpriteFont titleFont;
         private ScreenManager _screenManager;
 
         private int lastWidth;
@@ -22,25 +23,26 @@ namespace stardewValleyUWP.Screens
         public titleScreen(ScreenManager manager)
         {
             _screenManager = manager;
-
-            // Subscribe to UWP keyboard events
             var coreWindow = CoreApplication.GetCurrentView().CoreWindow;
             coreWindow.KeyDown += CoreWindow_KeyDown;
         }
 
         private void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
         {
+            if (grid == null) return; // safe check
             if (args.VirtualKey == VirtualKey.G)
                 grid.Visible = !grid.Visible;
         }
 
         public override void LoadContent()
         {
-            buttonFont = GameServices.Content.Load<SpriteFont>("Fonts/boldPixels");
-            var viewport = GameServices.SpriteBatch.GraphicsDevice.Viewport;
+            buttonFont = GameServices.Content.Load<SpriteFont>("Fonts/MediumBoldPixels");
+            titleFont = GameServices.Content.Load<SpriteFont>("Fonts/LargeBoldPixels");
 
+            var viewport = GameServices.SpriteBatch.GraphicsDevice.Viewport;
             grid = new Grid(5, 5, viewport.Width, viewport.Height,
                             GameServices.SpriteBatch.GraphicsDevice);
+
             lastWidth = viewport.Width;
             lastHeight = viewport.Height;
 
@@ -52,15 +54,15 @@ namespace stardewValleyUWP.Screens
                 HoverColor = Color.Blue,
                 onClick = () => _screenManager.SwitchScreen("Gameplay")
             };
+            uiManager.AddElementAsync(startButton, 4, 1); // row 4, col 1
 
-            uiManager.AddElementAsync(startButton, 1, 1);
+            var titleLabel = new Label("Stardew Valley UWP", titleFont);
+            uiManager.AddElementAsync(titleLabel, 0, 2); // row 0, col 2
         }
 
         public override void Update(GameTime gameTime)
         {
             var viewport = GameServices.SpriteBatch.GraphicsDevice.Viewport;
-
-            // Detect resize
             if (viewport.Width != lastWidth || viewport.Height != lastHeight)
             {
                 lastWidth = viewport.Width;

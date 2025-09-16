@@ -103,6 +103,7 @@
     <Compile Include="Handlers\ScreenManager.cs" />
     <Compile Include="Handlers\UIHandler.cs" />
     <Compile Include="Objects\Button.cs" />
+    <Compile Include="Objects\Label.cs" />
     <Compile Include="Objects\Screen.cs" />
     <Compile Include="Objects\UIElement.cs" />
     <Compile Include="Screens\loadScreen.cs" />

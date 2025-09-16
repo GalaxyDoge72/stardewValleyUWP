@@ -13,10 +13,24 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Fonts/boldPixels.spritefont
+#begin Fonts/LargeBoldPixels.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:Fonts/boldPixels.spritefont
+/build:Fonts/LargeBoldPixels.spritefont
+
+#begin Fonts/MediumBoldPixels.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/MediumBoldPixels.spritefont
+
+#begin Fonts/SmallBoldPixels.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/SmallBoldPixels.spritefont
 

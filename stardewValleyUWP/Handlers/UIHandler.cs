@@ -25,10 +25,7 @@ namespace stardewValleyUWP.Handlers
 
         public async Task AddElementAsync(IUIElement element, int row, int col, float widthPercent = 1f, float heightPercent = 1f)
         {
-            if (row <= 0 || col <= 0 || row > grid.rowCount || col > grid.columnCount)
-            {
-                await MessageBox.Show("Attempted to add UI element with invalid column or row value.\nThis object will not appear on the screen and cannot be interacted with.", "Invalid Object Placement");
-            }
+
 
             elementInfos.Add(new UIElementInfo
             {
@@ -46,7 +43,7 @@ namespace stardewValleyUWP.Handlers
 
         private void RecalculateElement(UIElementInfo info)
         {
-            info.Element.Bounds = grid.GetCellScaled(info.Row, info.Col, info.WidthPercent, info.HeightPercent);
+            info.Element.Bounds = grid.GetCellScaled(info.Row, info.Col, info.WidthPercent, info.HeightPercent, margin: 5);
         }
 
         public void RecalculatePositions()
