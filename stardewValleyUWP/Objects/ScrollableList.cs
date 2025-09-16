@@ -77,16 +77,19 @@ namespace stardewValleyUWP.Objects
 
         public void Draw(SpriteBatch spriteBatch, float alpha = 1f)
         {
-            Texture2D texture = TextureFactory.GetPlainTexture(spriteBatch.GraphicsDevice);
+            var texture = TextureFactory.GetPlainTexture(spriteBatch.GraphicsDevice);
+
+            // Draw background for the entire list
             spriteBatch.Draw(texture, Bounds, BGColor * alpha);
 
+            // If the list is empty, draw the 'Create New Save' message.
             if (Items.Count == 0)
             {
                 string msg = "Create New Save";
                 Vector2 size = Font.MeasureString(msg);
                 Vector2 pos = new Vector2(
-                    Bounds.X + (Bounds.Width - size.X) /2,
-                    Bounds.Y + (Bounds.Height -size.Y) /2
+                    Bounds.X + (Bounds.Width - size.X) / 2,
+                    Bounds.Y + (Bounds.Height - size.Y) / 2
                 );
                 spriteBatch.DrawString(Font, msg, pos, TextColor * alpha);
                 return;
@@ -98,10 +101,13 @@ namespace stardewValleyUWP.Objects
                 int itemIndex = scrollOffset + i;
                 if (itemIndex >= Items.Count) break;
 
+                string itemText = Items[itemIndex].Text;
+                Vector2 textSize = Font.MeasureString(itemText);
+
                 Rectangle itemBounds = new Rectangle(
                     Bounds.X,
                     Bounds.Y + i * itemHeight,
-                    Bounds.Width,
+                    (int)textSize.X + 20,
                     itemHeight
                 );
 
