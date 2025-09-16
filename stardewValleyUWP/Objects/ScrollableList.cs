@@ -8,6 +8,11 @@ using System.Runtime.InteropServices;
 
 namespace stardewValleyUWP.Objects
 {
+    public class ListItem
+    {
+        public string Text { get; set; }
+        public Action OnClick { get; set; }
+    }
     public class ScrollableList : IUIElement
     {
         public Rectangle Bounds { get; set; }
@@ -16,7 +21,7 @@ namespace stardewValleyUWP.Objects
         public Color BGColor { get; set; } = Color.DarkSlateGray;
         public Color HoverColor { get; set; } = Color.DimGray;
 
-        public List<string> Items { get; private set; } = new List<string>();
+        public List<ListItem> Items { get; private set; } = new List<ListItem>();
         public Action<string> OnItemClick { get; set; }
 
         private int scrollOffset = 0;
@@ -33,9 +38,9 @@ namespace stardewValleyUWP.Objects
             return Bounds.Height / itemHeight;
         }
 
-        public void SetItems(List<string> items)
+        public void SetItems(List<ListItem> items)
         {
-            Items = items ?? new List<string>();
+            Items = items ?? new List<ListItem>();
             scrollOffset = 0;
         }
 
@@ -64,7 +69,7 @@ namespace stardewValleyUWP.Objects
                     
                     if (mouse.LeftButton == ButtonState.Pressed)
                     {
-                        OnItemClick?.Invoke(Items[index]);
+                        Items[index].OnClick?.Invoke();
                     }
                 }
             }
@@ -105,7 +110,7 @@ namespace stardewValleyUWP.Objects
                     spriteBatch.Draw(texture, itemBounds, HoverColor * alpha);
                 }
 
-                spriteBatch.DrawString(Font, Items[itemIndex],
+                spriteBatch.DrawString(Font, Items[itemIndex].Text,
                     new Vector2(itemBounds.X + 5, itemBounds.Y + 5),
                     TextColor * alpha);
             }

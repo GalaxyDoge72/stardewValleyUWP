@@ -27,26 +27,39 @@ namespace stardewValleyUWP.Objects
         public void PopulateList()
         {
             var saves = SaveHandler.getSaveFileNames();
+            var listItems = new List<ListItem>();
 
             if (saves.Count > 0)
             {
-                list.SetItems(saves);
+                foreach (var save in saves)
+                {
+                    listItems.Add(new ListItem
+                    {
+                        Text = save,
+                        OnClick = () => LoadSave(save)
+                    });
+                }
             }
+
             else
             {
-                list.SetItems(new List<string> { "Create New Save" });
-                list.OnItemClick = (name) =>
+                listItems.Add(new ListItem
                 {
-                    SaveHandler.CreateNewSave("NewSave1");
-                    PopulateList(); // refresh list
-                };
+                    Text = "Create New Save",
+                    OnClick = () =>
+                    {
+                        SaveHandler.CreateNewSave("NewSave1");
+                        PopulateList(); // refresh list
+                    }
+                });
             }
+
+            list.SetItems(listItems);
         }
 
         private void LoadSave(string saveName)
         {
             string data = SaveHandler.LoadSave(saveName);
-            // TODO: parse data & load game
         }
 
         public void Update(GameTime gameTime) => list.Update(gameTime);
