@@ -1,6 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using stardewValleyUWP.Objects;
+using System.Threading.Tasks;
+using stardewValleyUWP.Utilities;
+using System;
 
 namespace stardewValleyUWP.Handlers
 {
@@ -15,12 +18,17 @@ namespace stardewValleyUWP.Handlers
             screen.LoadContent();
         }
 
-        public void SwitchScreen(string key)
+        public async Task SwitchScreen(string key)
         {
             if (_screens.TryGetValue(key, out var newScreen))
             {
                 _currentScreen?.UnloadContent();
                 _currentScreen = newScreen;
+            }
+
+            else
+            {
+                await MessageBox.Show($"FATAL: Attempted to switch to screen '{key}'.\nThis screen does not exist or could not be found.", "Fatal exception!", true);
             }
         }
 

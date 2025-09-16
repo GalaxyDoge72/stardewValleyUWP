@@ -4,6 +4,7 @@ using stardewValleyUWP.Screens;
 using stardewValleyUWP.Utilities;
 using Microsoft.Xna.Framework.Graphics;
 using Windows.UI.Xaml.Controls;
+using Microsoft.Xna.Framework.Input;
 
 namespace stardewValleyUWP
 {
@@ -11,6 +12,8 @@ namespace stardewValleyUWP
     {
         private GraphicsDeviceManager _graphics;
         private ScreenManager _screenManager;
+
+        private KeyboardState prevKeyState;
 
         public Game1()
         {
@@ -36,6 +39,7 @@ namespace stardewValleyUWP
 
         protected override void Update(GameTime gameTime)
         {
+
             _screenManager.Update(gameTime);
             base.Update(gameTime);
         }
