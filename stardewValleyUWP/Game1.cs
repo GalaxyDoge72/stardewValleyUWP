@@ -5,6 +5,7 @@ using stardewValleyUWP.Utilities;
 using Microsoft.Xna.Framework.Graphics;
 using Windows.UI.Xaml.Controls;
 using Microsoft.Xna.Framework.Input;
+using Windows.UI.Composition;
 
 namespace stardewValleyUWP
 {
@@ -34,6 +35,7 @@ namespace stardewValleyUWP
             GameServices.SpriteBatch = new SpriteBatch(GraphicsDevice);
 
             _screenManager.AddScreen("MainMenu", new titleScreen(_screenManager));
+            _screenManager.AddScreen("LoadScreen", new LoadScreen(_screenManager));
             _screenManager.SwitchScreen("MainMenu");
         }
 

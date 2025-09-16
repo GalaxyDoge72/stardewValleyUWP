@@ -52,12 +52,20 @@ namespace stardewValleyUWP.Screens
             {
                 BGColor = Color.DarkBlue,
                 HoverColor = Color.Blue,
-                onClick = () => _screenManager.SwitchScreen("Gameplay")
+                onClick = () => _screenManager.switchScreenWithFade("LoadScreen", 1.5f)
             };
-            uiManager.AddElementAsync(startButton, 4, 1); // row 4, col 1
+            _ = uiManager.AddElementAsync(startButton, 4, 1); // row 4, col 1
+
+            var settingsButton = new Button(Rectangle.Empty, "Settings", buttonFont)
+            {
+                BGColor = Color.DarkBlue,
+                HoverColor = Color.Blue,
+                onClick = () => _screenManager.SwitchScreen("Settings")
+            };
+            _ =uiManager.AddElementAsync(settingsButton, 4, 3);
 
             var titleLabel = new Label("Stardew Valley UWP", titleFont);
-            uiManager.AddElementAsync(titleLabel, 0, 2); // row 0, col 2
+            _ = uiManager.AddElementAsync(titleLabel, 0, 2); // row 0, col 2
         }
 
         public override void Update(GameTime gameTime)

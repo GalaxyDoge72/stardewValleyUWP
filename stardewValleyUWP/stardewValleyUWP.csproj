@@ -104,7 +104,9 @@
     <Compile Include="Handlers\UIHandler.cs" />
     <Compile Include="Objects\Button.cs" />
     <Compile Include="Objects\Label.cs" />
+    <Compile Include="Objects\SaveListUI.cs" />
     <Compile Include="Objects\Screen.cs" />
+    <Compile Include="Objects\ScrollableList.cs" />
     <Compile Include="Objects\UIElement.cs" />
     <Compile Include="Screens\loadScreen.cs" />
     <Compile Include="Screens\titleScreen.cs" />
@@ -114,6 +116,7 @@
     <Compile Include="Utilities\GameServices.cs" />
     <Compile Include="Utilities\GridService.cs" />
     <Compile Include="Utilities\MessageBox.cs" />
+    <Compile Include="Utilities\SaveHandler.cs" />
     <Compile Include="Utilities\TextureFactory.cs" />
   </ItemGroup>
   <ItemGroup>
