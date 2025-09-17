@@ -1,10 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Input.Touch;
+using stardewValleyUWP.Objects;
 using stardewValleyUWP.Utilities;
 using System;
 using System.Collections.Generic;
-using stardewValleyUWP.Objects;
 
 namespace stardewValleyUWP.Objects
 {
@@ -24,10 +25,12 @@ namespace stardewValleyUWP.Objects
         private int hoveredIndex = -1;
 
         private MouseState previousMouseState;
+        private TouchLocationState previousTouchState = TouchLocationState.Released;
 
         public ScrollableList(SpriteFont font)
         {
             Font = font;
+            TouchPanel.EnabledGestures = GestureType.Tap;
         }
 
         private int VisibleItemCount()
@@ -44,26 +47,45 @@ namespace stardewValleyUWP.Objects
         public void Update(GameTime gameTime)
         {
             var mouse = Mouse.GetState();
+            var touchCollection = TouchPanel.GetState();
             hoveredIndex = -1;
 
+            Vector2 inputPosition = Vector2.Zero;
+            bool isNewClick = false;
+
+            // Check for mouse input
             if (Bounds.Contains(mouse.Position))
             {
-                // Handle scroll wheel
-                int scrollDelta = mouse.ScrollWheelValue;
-                if (scrollDelta != 0)
+                inputPosition = new Vector2(mouse.Position.X, mouse.Position.Y);
+                if (mouse.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
                 {
-                    scrollOffset -= scrollDelta / 120;
-                    if (scrollOffset < 0) scrollOffset = 0;
-                    int maxOffset = Math.Max(0, Items.Count - VisibleItemCount());
-                    if (scrollOffset > maxOffset) scrollOffset = maxOffset;
+                    isNewClick = true;
                 }
+            }
 
-                int relativeY = mouse.Y - Bounds.Y;
+            // Check for touch input
+            if (touchCollection.Count > 0)
+            {
+                var touch = touchCollection[0];
+                if (Bounds.Contains(touch.Position))
+                {
+                    inputPosition = touch.Position;
+                    if (touch.State == TouchLocationState.Pressed && previousTouchState != TouchLocationState.Pressed)
+                    {
+                        isNewClick = true;
+                    }
+                }
+            }
+
+            // Now, handle interactions with the unified input position
+            if (inputPosition != Vector2.Zero)
+            {
+                int relativeY = (int)inputPosition.Y - Bounds.Y;
                 int index = scrollOffset + (relativeY / itemHeight);
 
                 if (index >= 0 && index < Items.Count)
                 {
-                    // Calculate the bounds for the entire item row, including sub-buttons.
+                    // Recalculate item bounds based on text length and sub-buttons
                     Vector2 textSize = Font.MeasureString(Items[index].Text);
                     float mainButtonWidth = textSize.X + 15;
                     float subButtonAreaWidth = 0;
@@ -82,43 +104,50 @@ namespace stardewValleyUWP.Objects
                         itemHeight
                     );
 
-                    if (itemBounds.Contains(mouse.Position))
+                    if (itemBounds.Contains(inputPosition))
                     {
                         hoveredIndex = index;
 
-                        if (Items[index].SubButtons != null)
+                        if (isNewClick)
                         {
-                            float currentX = itemBounds.X + mainButtonWidth + 5;
-                            foreach (var subButton in Items[index].SubButtons)
+                            // Check for clicks on sub-buttons first
+                            if (Items[index].SubButtons != null)
                             {
-                                Rectangle subButtonBounds = new Rectangle(
-                                    (int)currentX,
-                                    itemBounds.Y + (itemBounds.Height - (int)subButton.Size.Y) / 2,
-                                    (int)subButton.Size.X,
-                                    (int)subButton.Size.Y
-                                );
-
-                                if (subButtonBounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
+                                float currentX = itemBounds.X + mainButtonWidth + 5;
+                                foreach (var subButton in Items[index].SubButtons)
                                 {
-                                    subButton.OnClick?.Invoke();
-                                    previousMouseState = mouse;
-                                    return;
-                                }
-                                currentX += subButton.Size.X + 5;
-                            }
-                        }
+                                    Rectangle subButtonBounds = new Rectangle(
+                                        (int)currentX,
+                                        itemBounds.Y + (itemBounds.Height - (int)subButton.Size.Y) / 2,
+                                        (int)subButton.Size.X,
+                                        (int)subButton.Size.Y
+                                    );
 
-                        if (mouse.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
-                        {
+                                    if (subButtonBounds.Contains(inputPosition))
+                                    {
+                                        subButton.OnClick?.Invoke();
+                                        break;
+                                    }
+                                    currentX += subButton.Size.X + 5;
+                                }
+                            }
+                            // Trigger the main list item's OnClick action
                             Items[index].OnClick?.Invoke();
                         }
                     }
                 }
             }
+
+            // Store the current states for the next update
             previousMouseState = mouse;
+            if (touchCollection.Count > 0)
+            {
+                previousTouchState = touchCollection[0].State;
+            }
         }
 
-        public void Draw(SpriteBatch spriteBatch, float alpha = 1f)
+
+public void Draw(SpriteBatch spriteBatch, float alpha = 1f)
         {
             var texture = TextureFactory.GetPlainTexture(spriteBatch.GraphicsDevice);
 
