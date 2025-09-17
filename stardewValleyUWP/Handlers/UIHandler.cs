@@ -1,9 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using stardewValleyUWP.Objects;
-using System.Collections.Generic;
 using stardewValleyUWP.Utilities;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace stardewValleyUWP.Handlers
 {
@@ -62,6 +63,22 @@ namespace stardewValleyUWP.Handlers
         {
             foreach (var info in elementInfos)
                 info.Element.Draw(spriteBatch);
+        }
+
+        public void HandleTouchInput(Vector2 touchPosition)
+        {
+            foreach (var elementInfo in elementInfos) // Changed variable name for clarity
+            {
+                // Access the IUIElement from the UIElementInfo object
+                if (elementInfo.Element is Button button)
+                {
+                    if (button.Bounds.Contains(touchPosition))
+                    {
+                        button.onClick?.Invoke();
+                        return; // Exit after the first button is clicked
+                    }
+                }
+            }
         }
     }
 }

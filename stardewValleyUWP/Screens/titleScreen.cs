@@ -1,8 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input.Touch;
+using stardewValleyUWP.Handlers;
 using stardewValleyUWP.Objects;
 using stardewValleyUWP.Utilities;
-using stardewValleyUWP.Handlers;
 using Windows.ApplicationModel.Core;
 using Windows.System;
 using Windows.UI.Core;
@@ -80,6 +81,17 @@ namespace stardewValleyUWP.Screens
                 grid.Height = viewport.Height;
 
                 uiManager.RecalculatePositions();
+            }
+
+            // Get the touch collection
+            TouchCollection touchCollection = TouchPanel.GetState();
+
+            // Check for a new touch
+            if (touchCollection.Count > 0 && touchCollection[0].State == TouchLocationState.Pressed)
+            {
+                Vector2 touchPosition = touchCollection[0].Position;
+                // Pass the touch position to the UIManager for processing
+                uiManager.HandleTouchInput(touchPosition);
             }
 
             uiManager.Update(gameTime);

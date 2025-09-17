@@ -1,11 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using stardewValleyUWP.Handlers;
 using stardewValleyUWP.Screens;
 using stardewValleyUWP.Utilities;
-using Microsoft.Xna.Framework.Graphics;
-using Windows.UI.Xaml.Controls;
-using Microsoft.Xna.Framework.Input;
+using Windows.Graphics.Display;
+using Windows.System.Profile;
 using Windows.UI.Composition;
+using Windows.UI.Xaml.Controls;
 
 namespace stardewValleyUWP
 {
@@ -15,12 +17,20 @@ namespace stardewValleyUWP
         private ScreenManager _screenManager;
 
         private KeyboardState prevKeyState;
+        private bool isWindowsPhone = false;
 
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
+            isWindowsPhone = AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Mobile";
+
+            if (isWindowsPhone)
+            {
+                DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
+            }
         }
 
         protected override void Initialize()
@@ -41,7 +51,6 @@ namespace stardewValleyUWP
 
         protected override void Update(GameTime gameTime)
         {
-
             _screenManager.Update(gameTime);
             base.Update(gameTime);
         }
