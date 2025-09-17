@@ -63,5 +63,14 @@ namespace stardewValleyUWP.Utilities
             string path = GetSavePath(saveName);
             File.WriteAllText(path, data);
         }
+
+        public static void DeleteSave(string saveName)
+        {
+            string savePath = GetSavePath(saveName);
+            if (File.Exists(savePath))
+            {
+               File.Delete(savePath);
+            }
+        }
     }
 }

@@ -4,15 +4,10 @@ using Microsoft.Xna.Framework.Input;
 using stardewValleyUWP.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using stardewValleyUWP.Objects;
 
 namespace stardewValleyUWP.Objects
 {
-    public class ListItem
-    {
-        public string Text { get; set; }
-        public Action OnClick { get; set; }
-    }
     public class ScrollableList : IUIElement
     {
         public Rectangle Bounds { get; set; }
@@ -25,8 +20,10 @@ namespace stardewValleyUWP.Objects
         public Action<string> OnItemClick { get; set; }
 
         private int scrollOffset = 0;
-        private int itemHeight = 32;
+        private const int itemHeight = 32; // A constant item height for simplicity
         private int hoveredIndex = -1;
+
+        private MouseState previousMouseState;
 
         public ScrollableList(SpriteFont font)
         {
@@ -51,10 +48,11 @@ namespace stardewValleyUWP.Objects
 
             if (Bounds.Contains(mouse.Position))
             {
-                if (mouse.ScrollWheelValue != 0)
+                // Handle scroll wheel
+                int scrollDelta = mouse.ScrollWheelValue;
+                if (scrollDelta != 0)
                 {
-                    int delta = mouse.ScrollWheelValue / 120;
-                    scrollOffset -= delta;
+                    scrollOffset -= scrollDelta / 120;
                     if (scrollOffset < 0) scrollOffset = 0;
                     int maxOffset = Math.Max(0, Items.Count - VisibleItemCount());
                     if (scrollOffset > maxOffset) scrollOffset = maxOffset;
@@ -65,24 +63,67 @@ namespace stardewValleyUWP.Objects
 
                 if (index >= 0 && index < Items.Count)
                 {
-                    hoveredIndex = index;
-                    
-                    if (mouse.LeftButton == ButtonState.Pressed)
+                    // Calculate the bounds for the entire item row, including sub-buttons.
+                    Vector2 textSize = Font.MeasureString(Items[index].Text);
+                    float mainButtonWidth = textSize.X + 15;
+                    float subButtonAreaWidth = 0;
+                    if (Items[index].SubButtons != null)
                     {
-                        Items[index].OnClick?.Invoke();
+                        foreach (var subButton in Items[index].SubButtons)
+                        {
+                            subButtonAreaWidth += subButton.Size.X + 5;
+                        }
+                    }
+
+                    Rectangle itemBounds = new Rectangle(
+                        Bounds.X,
+                        Bounds.Y + (index - scrollOffset) * itemHeight,
+                        (int)(mainButtonWidth + subButtonAreaWidth),
+                        itemHeight
+                    );
+
+                    if (itemBounds.Contains(mouse.Position))
+                    {
+                        hoveredIndex = index;
+
+                        if (Items[index].SubButtons != null)
+                        {
+                            float currentX = itemBounds.X + mainButtonWidth + 5;
+                            foreach (var subButton in Items[index].SubButtons)
+                            {
+                                Rectangle subButtonBounds = new Rectangle(
+                                    (int)currentX,
+                                    itemBounds.Y + (itemBounds.Height - (int)subButton.Size.Y) / 2,
+                                    (int)subButton.Size.X,
+                                    (int)subButton.Size.Y
+                                );
+
+                                if (subButtonBounds.Contains(mouse.Position) && mouse.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
+                                {
+                                    subButton.OnClick?.Invoke();
+                                    previousMouseState = mouse;
+                                    return;
+                                }
+                                currentX += subButton.Size.X + 5;
+                            }
+                        }
+
+                        if (mouse.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
+                        {
+                            Items[index].OnClick?.Invoke();
+                        }
                     }
                 }
             }
+            previousMouseState = mouse;
         }
 
         public void Draw(SpriteBatch spriteBatch, float alpha = 1f)
         {
             var texture = TextureFactory.GetPlainTexture(spriteBatch.GraphicsDevice);
 
-            // Draw background for the entire list
             spriteBatch.Draw(texture, Bounds, BGColor * alpha);
 
-            // If the list is empty, draw the 'Create New Save' message.
             if (Items.Count == 0)
             {
                 string msg = "Create New Save";
@@ -101,24 +142,70 @@ namespace stardewValleyUWP.Objects
                 int itemIndex = scrollOffset + i;
                 if (itemIndex >= Items.Count) break;
 
+                // Measure the main text to determine its width
                 string itemText = Items[itemIndex].Text;
                 Vector2 textSize = Font.MeasureString(itemText);
+                float mainButtonWidth = textSize.X + 15; // Text width + padding
 
+                // Calculate total width required for all sub-buttons
+                float subButtonAreaWidth = 0;
+                if (Items[itemIndex].SubButtons != null)
+                {
+                    foreach (var subButton in Items[itemIndex].SubButtons)
+                    {
+                        subButtonAreaWidth += subButton.Size.X + 5;
+                    }
+                }
+
+                // Define the bounds for the entire list item row
                 Rectangle itemBounds = new Rectangle(
                     Bounds.X,
                     Bounds.Y + i * itemHeight,
-                    (int)textSize.X + 20,
+                    (int)(mainButtonWidth),
                     itemHeight
                 );
 
+                // Draw the background for the entire list item, or a hover background if needed
                 if (itemIndex == hoveredIndex)
                 {
                     spriteBatch.Draw(texture, itemBounds, HoverColor * alpha);
                 }
+                else
+                {
+                    spriteBatch.Draw(texture, itemBounds, BGColor * alpha);
+                }
 
-                spriteBatch.DrawString(Font, Items[itemIndex].Text,
-                    new Vector2(itemBounds.X + 5, itemBounds.Y + 5),
-                    TextColor * alpha);
+                // Draw the main list item text
+                Vector2 textPos = new Vector2(itemBounds.X + 5, itemBounds.Y + (itemBounds.Height - textSize.Y) / 2);
+                spriteBatch.DrawString(Font, itemText, textPos, TextColor * alpha);
+
+                // Draw the sub-buttons next to the main text
+                if (Items[itemIndex].SubButtons != null)
+                {
+                    float currentX = itemBounds.X + mainButtonWidth + 5;
+                    foreach (var subButton in Items[itemIndex].SubButtons)
+                    {
+                        Vector2 buttonSize = subButton.Size;
+                        Rectangle subButtonBounds = new Rectangle(
+                            (int)currentX + 5,
+                            itemBounds.Y + (itemBounds.Height - (int)buttonSize.Y) / 2,
+                            (int)buttonSize.X,
+                            (int)buttonSize.Y
+                        );
+
+                        spriteBatch.Draw(texture, subButtonBounds, Color.Red * alpha);
+
+                        Vector2 subTextSize = Font.MeasureString(subButton.Text);
+                        Vector2 subButtonSize = subButton.Size;
+                        Vector2 subTextPos = new Vector2(
+                            subButtonBounds.X + (subButtonBounds.Width - subTextSize.X) / 2,
+                            subButtonBounds.Y + (subButtonBounds.Height - subTextSize.Y) / 2
+                        );
+                        spriteBatch.DrawString(Font, subButton.Text, subTextPos, Color.White * alpha);
+
+                        currentX += buttonSize.X + 5;
+                    }
+                }
             }
         }
 
